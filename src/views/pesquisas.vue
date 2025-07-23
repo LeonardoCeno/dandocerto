@@ -3,7 +3,7 @@
 <Header></Header>
 
 <div class="inputpesquisa" >
-    <h2>Resultados para:</h2>
+    <h2>Resultados para: <span v-if="termoBusca">"{{ termoBusca }}"</span></h2>
     </div>
 
 <div class="tudo" >
@@ -75,8 +75,27 @@
                 </select>
             </div>
         </div>
-        <div class="tudo-conteudos" >
-            <!-- Aqui entrariam os resultados filtrados -->
+        <div class="tudo-conteudos">
+            <div v-if="carregando" class="carregando">Carregando produtos...</div>
+            <div v-else-if="erro" class="erro">{{ erro }}</div>
+            <div v-else-if="produtosFiltrados.length === 0" class="nenhum-produto">Nenhum produto encontrado.</div>
+            <div v-else class="lista-pesquisa">
+                <div class="produto" v-for="produto in produtosFiltrados" :key="produto.id">
+                    <div class="nome-preco-imagem" style="position:relative;">
+                        <img :src="produto.image_path" alt="Imagem do produto" class="produto-imagem" />
+                        <img :src="produto.stock >= 1 ? DISPONIVELREAL : INDISPONIVELREAL" :alt="produto.stock >= 1 ? 'Disponível' : 'Indisponível'" class="disponivel-selo" />
+                        <h4>{{ produto.name }}</h4>
+                        <p>R$ {{ produto.price }}</p>
+                    </div>
+                    <div class="add">
+                        <button>
+                            <img src="../components/img/maisumcarrinho.png" alt="">
+                            <p>Adicionar</p>
+                        </button>
+                        <img src="../components/img/coraçaofav.png" alt="">
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -87,15 +106,82 @@
 
 <script setup>
 
-import { ref } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import Header from '../components/Headercomponent.vue'
 import Footer from '../components/Footercomponent.vue'
+import api from '../services/api'
+import DISPONIVELREAL from '../components/img/DISPONIVELREAL.png'
+import INDISPONIVELREAL from '../components/img/INDISPONIVELREAL.png'
 
 const abertoPrecos = ref(false)
 const abertoCategoria = ref(false)
 const abertoFormato = ref(false)
 const abertoDescontos = ref(false)
 const ordemSelecionada = ref('alfabetica')
+
+const produtos = ref([])
+const produtosFiltrados = ref([])
+const carregando = ref(false)
+const erro = ref('')
+const route = useRoute()
+const termoBusca = ref('')
+
+async function buscarProdutos() {
+    carregando.value = true
+    erro.value = ''
+    try {
+        const response = await api.get('/products/user/228')
+        produtos.value = response.data.map(produto => ({
+            ...produto,
+            image_path: produto.image_path && !produto.image_path.startsWith('http')
+                ? 'http://35.196.79.227:8000' + produto.image_path
+                : produto.image_path
+        }))
+        filtrarProdutos()
+    } catch (e) {
+        erro.value = 'Erro ao buscar produtos.'
+    } finally {
+        carregando.value = false
+    }
+}
+
+function filtrarProdutos() {
+    const termo = termoBusca.value.trim().toLowerCase()
+    let filtrados = produtos.value
+    if (termo.length > 0) {
+        filtrados = filtrados.filter(p => p.name && p.name.toLowerCase().includes(termo))
+            .map(p => ({
+                ...p,
+                matchIndex: p.name.toLowerCase().indexOf(termo)
+            }))
+            .sort((a, b) => {
+                if (a.matchIndex !== b.matchIndex) return a.matchIndex - b.matchIndex
+                return a.name.length - b.name.length
+            })
+    }
+    // Ordenação extra (aplicada após similaridade)
+    if (ordemSelecionada.value === 'valor-crescente') {
+        filtrados = filtrados.slice().sort((a, b) => Number(a.price) - Number(b.price))
+    } else if (ordemSelecionada.value === 'valor-decrescente') {
+        filtrados = filtrados.slice().sort((a, b) => Number(b.price) - Number(a.price))
+    } else if (ordemSelecionada.value === 'alfabetica' && termo.length === 0) {
+        filtrados = filtrados.slice().sort((a, b) => a.name.localeCompare(b.name))
+    }
+    produtosFiltrados.value = filtrados
+}
+
+onMounted(() => {
+    termoBusca.value = route.query.termo ? String(route.query.termo) : ''
+    buscarProdutos()
+})
+
+watch(() => route.query.termo, (novo) => {
+    termoBusca.value = novo ? String(novo) : ''
+    filtrarProdutos()
+})
+
+watch(ordemSelecionada, filtrarProdutos)
 
 </script>
 
@@ -105,7 +191,8 @@ const ordemSelecionada = ref('alfabetica')
     display: flex;
     justify-content: center;
     width: 100%;
-    height: 100vh;
+    height: auto;
+    min-height: 100vh;
     padding: 15px;
     gap: 20px;
 }
@@ -274,7 +361,125 @@ const ordemSelecionada = ref('alfabetica')
     gap: 32px;
     width: 100%;
     align-items: center;
-    background-color: #28eba0fa;
+    background-color: #fffffffa;
+}
+
+.lista-pesquisa {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    justify-items: center;
+    padding: 4px;
+    position: relative;
+    gap: 10px;
+    width: 100%;
+}
+.produto {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: center;
+    width: 230px;
+    height: 92%;
+    margin-top: 3vh;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.nome-preco-imagem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.nome-preco-imagem img {
+    margin-top: 10px;
+    height: 225px;
+    width: 160px;
+    border: 0.1px solid rgb(212, 212, 212);
+    filter: contrast(100%);
+}
+.nome-preco-imagem .disponivel-selo {
+    width: 95px;
+    height: auto;
+    border: none;
+    position: absolute;
+    left: 0px;
+    bottom: 80px;
+    z-index: 2;
+    border-radius: 9px;
+}
+.add {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    opacity: 0;
+    pointer-events: none;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+}
+.add button {
+    display: flex;
+    align-items: center;
+    background-color: #030a11f5;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 7px;
+    gap: 7px;
+    width: 150px;
+}
+.add button:hover {
+    background-color: #02060ade;
+}
+.add button p {
+    color: white;
+}
+.add button img {
+    width: 20px;
+    height: auto;
+    border: none;
+    filter: invert(1);
+}
+.add img {
+    width: 20px;
+    height: auto;
+    filter: invert(6%) sepia(50%) saturate(200%) hue-rotate(160deg) brightness(100%) contrast(100%);
+}
+.add img:hover {
+    opacity: 0.9;
+}
+.produto:hover .add {
+    opacity: 1;
+    pointer-events: auto;
+}
+.produto:hover {
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+}
+.produto h4 {
+    font-family: 'Roboto', sans-serif;
+    font-size: 15px;
+    color: rgb(65, 65, 65);
+    margin-top: 10px;
+    height: 40px;
+}
+.nenhum-produto {
+    color: #444;
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-top: 32px;
+    text-align: center;
+    width: 100%;
+}
+.carregando {
+    color: #3a9c73;
+    margin-top: 20px;
+    font-size: 1.1rem;
+}
+.erro {
+    color: #c0392b;
+    margin-top: 20px;
+    font-size: 1.1rem;
 }
 
 </style>

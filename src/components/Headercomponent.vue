@@ -5,7 +5,7 @@
         <img src="../components/img/agrsimtabao-Photoroom.png" alt="" />
         </a>
         <div class="input desktop" style="position:relative;">
-            <input type="text" placeholder="Livros, Mangás, novos olhares..." v-model="busca" @input="onInputBusca" @focus="onFocusBusca" @blur="onBlurBusca" />
+            <input type="text" placeholder="Livros, Mangás, novos olhares..." v-model="busca" @input="onInputBusca" @focus="onFocusBusca" @blur="onBlurBusca" @keyup.enter="pesquisarEnter" />
             <img src="../components/img/LupaFinal.png" alt="" />
             <div v-if="mostrarSugestoes && sugestoes.length > 0 && busca.length > 0" class="autocomplete-sugestoes" @mousedown.prevent>
                 <div class="autocomplete-titulo">
@@ -81,7 +81,7 @@
             </div>
         </div>
         <div class="input mobile" style="position:relative;">
-            <input type="text" placeholder="Pesquisar" v-model="busca" @input="onInputBusca" @focus="onFocusBusca" @blur="onBlurBusca" />
+            <input type="text" placeholder="Pesquisar" v-model="busca" @input="onInputBusca" @focus="onFocusBusca" @blur="onBlurBusca" @keyup.enter="pesquisarEnter" />
             <img src="../components/img/LupaFinal.png" alt="" />
             <div v-if="mostrarSugestoes && sugestoes.length > 0" class="autocomplete-sugestoes" @mousedown.prevent>
                 <div class="autocomplete-titulo">
@@ -167,6 +167,16 @@ async function onInputBusca() {
         const termo = busca.value.toLowerCase()
         sugestoes.value = todosProdutosAdmin
             .filter(p => p.name && p.name.toLowerCase().includes(termo))
+            .map(p => ({
+                ...p,
+                matchIndex: p.name.toLowerCase().indexOf(termo)
+            }))
+            .sort((a, b) => {
+                // Prioriza nomes que contêm o termo mais "próximo" do início, mas não só no início
+                if (a.matchIndex !== b.matchIndex) return a.matchIndex - b.matchIndex
+                // Se o índice for igual, prioriza nomes mais curtos
+                return a.name.length - b.name.length
+            })
             .slice(0, 5)
         mostrarSugestoes.value = sugestoes.value.length > 0
     }, 100)
@@ -205,6 +215,14 @@ function goToPainel() {
 
 function irParaPesquisas() {
     router.push('/pesquisas')
+}
+
+function pesquisarEnter() {
+    if (busca.value.trim().length > 0) {
+        router.push({ path: '/pesquisas', query: { termo: busca.value.trim() } })
+        busca.value = ''
+        mostrarSugestoes.value = false
+    }
 }
 </script>
 
