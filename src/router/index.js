@@ -13,6 +13,7 @@ import ADMprodutosView from '../views/ADMprodutos.vue'
 import ADMpedidosView from '../views/ADMpedidos.vue'
 import ADMcuponsView from '../views/ADMcupons.vue'
 import PesquisasView from '../views/pesquisas.vue'
+import ADMmoderadoresView from '../views/ADMmoderadoes.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -86,6 +87,11 @@ const router = createRouter({
           path: '/ADMcupons',
           name: 'ADMcupons',
           component: ADMcuponsView,
+        },
+        {
+          path: '/ADMmoderadores',
+          name: 'ADMmoderadores',
+          component: ADMmoderadoresView,
         },
       ]
     }

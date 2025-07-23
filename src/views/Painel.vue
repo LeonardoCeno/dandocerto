@@ -1,7 +1,7 @@
 <template>
 <Header></Header>
 <div class="divisoria" ></div>
-<div class="Tudo" >
+<div class="Tudo">
     <div class="menuesquerdo" >
         <router-link to="/dados"> <button>Meus dados</button></router-link>
         <router-link to="/carrinho"> <button>Carrinho</button></router-link>
@@ -11,6 +11,7 @@
         <router-link to="/cupons"> <button>Cupons</button></router-link>
         <div class="admin" v-if="userRole === 'ADMIN' || userRole === 'MODERATOR'">
         <h3>ADMIN</h3>
+        <router-link to="/ADMmoderadores"> <button>Gerenciar Moderadores</button></router-link>
         <router-link to="/ADMcategorias"> <button>Gerenciar categorias</button></router-link>
         <router-link to="/ADMprodutos"> <button>Gerenciar produtos</button></router-link>
         <router-link to="/ADMpedidos"> <button>Gerenciar Pedidos</button></router-link>

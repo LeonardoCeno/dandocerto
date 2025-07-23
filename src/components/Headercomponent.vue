@@ -4,9 +4,24 @@
         <a class="logo desktop" href="/">
         <img src="../components/img/agrsimtabao-Photoroom.png" alt="" />
         </a>
-        <div class="input desktop">
-            <input type="text" placeholder="Livros, Mangás, novas visões..." />
+        <div class="input desktop" style="position:relative;">
+            <input type="text" placeholder="Livros, Mangás, novas visões..." v-model="busca" @input="onInputBusca" @focus="onFocusBusca" @blur="onBlurBusca" />
             <img src="../components/img/LupaFinal.png" alt="" />
+            <div v-if="mostrarSugestoes && sugestoes.length > 0 && busca.length > 0" class="autocomplete-sugestoes" @mousedown.prevent>
+                <div class="autocomplete-titulo">
+                    Resultados para "{{ busca }}"
+                </div>
+                <div v-for="produto in sugestoes.slice(0, 3)" :key="produto.id" class="sugestao-item" @mousedown.prevent="irParaProduto(produto.id)">
+                    <img v-if="produto.image_path" :src="produto.image_path.startsWith('http') ? produto.image_path : apiBase + produto.image_path" alt="imagem" />
+                    <div class="sugestao-info">
+                        <span class="disponivel">
+                            <img :src="produto.stock >= 1 ? DISPONIVELREAL : INDISPONIVELREAL" :alt="produto.stock >= 1 ? 'Disponível' : 'Indisponível'" />
+                        </span>
+                        <span class="sugestao-nome">{{ produto.name }}</span>
+                        <span class="sugestao-preco">R$ {{ produto.price }}</span>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="botoes desktop">
             <button>
@@ -65,9 +80,21 @@
                 </button>
             </div>
         </div>
-        <div class="input mobile">
-            <input type="text" placeholder="Pesquisar" />
+        <div class="input mobile" style="position:relative;">
+            <input type="text" placeholder="Pesquisar" v-model="busca" @input="onInputBusca" @focus="onFocusBusca" @blur="onBlurBusca" />
             <img src="../components/img/LupaFinal.png" alt="" />
+            <div v-if="mostrarSugestoes && sugestoes.length > 0" class="autocomplete-sugestoes" @mousedown.prevent>
+                <div class="autocomplete-titulo">
+                    Resultados para "{{ busca }}"
+                </div>
+                <div v-for="produto in sugestoes.slice(0, 3)" :key="produto.id" class="sugestao-item" @mousedown.prevent="irParaProduto(produto.id)">
+                    <img v-if="produto.image_path" :src="produto.image_path.startsWith('http') ? produto.image_path : apiBase + produto.image_path" alt="imagem" />
+                    <div class="sugestao-info">
+                        <span class="sugestao-nome">{{ produto.name }}</span>
+                        <span class="sugestao-preco">R$ {{ produto.price }}</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -99,9 +126,12 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import api from '../services/api'
+import api, { buscarProdutosAdmin228 } from '../services/api'
 import { useRouter, useRoute } from 'vue-router'
+import DISPONIVELREAL from './img/DISPONIVELREAL.png'
+import INDISPONIVELREAL from './img/INDISPONIVELREAL.png'
 
+const apiBase = 'http://35.196.79.227:8000'
 // Função para checar se o usuário está logado (token em memória)
 const isLoggedIn = computed(() => !!api.defaults.headers.common['Authorization'])
 const showDropdown = ref(false)
@@ -111,12 +141,55 @@ const route = useRoute()
 
 const painelChildrenRoutes = [
     'Dados', 'Cupons', 'Pedidos', 'Favoritos', 'Enderecos', 'Carrinho',
-    'ADMcategorias', 'ADMprodutos', 'ADMpedidos', 'ADMcupons'
+    'ADMcategorias', 'ADMprodutos', 'ADMpedidos', 'ADMcupons', 'ADMmoderadores'
 ]
 
 const esconderCategorias = computed(() => {
     return painelChildrenRoutes.includes(route.name)
 })
+
+const busca = ref('')
+const sugestoes = ref([])
+const mostrarSugestoes = ref(false)
+let todosProdutosAdmin = []
+let timeoutBusca = null
+
+async function carregarProdutosAdmin() {
+    if (todosProdutosAdmin.length === 0) {
+        todosProdutosAdmin = await buscarProdutosAdmin228()
+    }
+}
+
+async function onInputBusca() {
+    clearTimeout(timeoutBusca)
+    await carregarProdutosAdmin()
+    timeoutBusca = setTimeout(() => {
+        const termo = busca.value.toLowerCase()
+        sugestoes.value = todosProdutosAdmin
+            .filter(p => p.name && p.name.toLowerCase().includes(termo))
+            .slice(0, 5)
+        mostrarSugestoes.value = sugestoes.value.length > 0
+    }, 100)
+}
+
+function onFocusBusca() {
+    if (sugestoes.value.length > 0) {
+        mostrarSugestoes.value = true
+    }
+}
+
+function onBlurBusca() {
+    setTimeout(() => {
+        mostrarSugestoes.value = false
+        busca.value = ''
+    }, 120)
+}
+
+function irParaProduto(id) {
+    router.push(`/produto/${id}`)
+    mostrarSugestoes.value = false
+    busca.value = ''
+}
 
 function logout() {
     localStorage.removeItem('token')
@@ -150,6 +223,7 @@ header {
 
 .logo {
     position: relative;
+    justify-content: center;
     left: 20px;
     width: 12%;
     display: flex;
@@ -171,9 +245,9 @@ header {
     display: flex;
     align-items: center;
     background-color: #ffffff;
-    border-radius: 15px;
+    border-radius: 10px;
     padding: 0 20px;
-    width: 36vw;
+    width: 42vw;
     height: 45px;
     gap: 10px;
     flex-shrink: 1;
@@ -381,7 +455,7 @@ button:hover img {
     background: #fff;
     border: 1px solid #e5e7eb;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    min-width: 150px;
+    min-width: 100px;
     z-index: 100;
     display: flex;
     flex-direction: column;
@@ -393,7 +467,7 @@ button:hover img {
     color: #000000;
     padding: 10px 18px;
     text-align: left;
-    width: 200px;
+    width: 160px;
     font-size: 15px;
     cursor: pointer;
     transition: background 0.2s;
@@ -429,6 +503,74 @@ button:hover img {
 .categorias-dropdown-menu button:hover {
     color: #079ac7;
     transition: 0.1s;
+}
+
+.autocomplete-sugestoes {
+    position: absolute;
+    top: 45px;
+    left: 0;
+    width: 100%;
+    background: #fff;
+    border: 1.5px solid #979797;
+    border-radius: 0 0 12px 12px;
+    z-index: 100;
+    padding: 4px 0;
+}
+
+.sugestao-item {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 10px 18px;
+    cursor: pointer;
+    border-bottom: 1px solid #f2f2f2;
+}
+
+.sugestao-item img {
+    width: 80px;
+    height: 108px;
+    filter: none;
+}
+
+.sugestao-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.sugestao-info .disponivel img{
+    width: 90px;
+    height: auto;
+    border-radius: 7px;
+}
+
+.sugestao-nome {
+    font-size: 1.08rem;
+    font-weight: 600;
+    color: #222;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+}
+
+.sugestao-preco {
+    font-weight: Bold;
+    font-size: 1.2rem;
+    color: #414141;
+}
+
+.sugestao-item:hover {
+    background: #dfdfdf;
+}
+
+.autocomplete-titulo {
+    color: #888;
+    font-size: 0.98rem;
+    font-weight: 500;
+    padding: 10px 18px 4px 18px;
+    margin-bottom: 2px;
+    margin-top: 2px;
+    text-align: left;
+    letter-spacing: 0.01em;
 }
 
 </style>

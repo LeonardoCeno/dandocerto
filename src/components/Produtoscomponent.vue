@@ -15,8 +15,9 @@
     <div v-else-if="erro" class="erro">{{ erro }}</div>
     <div class="lista" v-else>
         <div class="produto" v-for="produto in produtosVisiveisObras" :key="produto.id">
-        <div class="nome-preco-imagem" >
+        <div class="nome-preco-imagem" style="position:relative;">
         <img :src="produto.image_path" alt="Imagem do produto" class="produto-imagem" />
+        <img :src="produto.stock >= 1 ? DISPONIVELREAL : INDISPONIVELREAL" :alt="produto.stock >= 1 ? 'Disponível' : 'Indisponível'" class="disponivel-selo" />
         <h4>{{ produto.name }}</h4>
         <p>R$ {{ produto.price }}</p>
         </div>
@@ -43,8 +44,9 @@
     <div v-else-if="erro" class="erro">{{ erro }}</div>
     <div class="lista" v-else>
         <div class="produto" v-for="produto in produtosVisiveisOfertas" :key="produto.id">
-        <div class="nome-preco-imagem" >
+        <div class="nome-preco-imagem" style="position:relative;">
         <img :src="produto.image_path" alt="Imagem do produto" class="produto-imagem" />
+        <img :src="produto.stock >= 1 ? DISPONIVELREAL : INDISPONIVELREAL" :alt="produto.stock >= 1 ? 'Disponível' : 'Indisponível'" class="disponivel-selo" />
         <h4>{{ produto.name }}</h4>
         <p>R$ {{ produto.price }}</p>
         </div>
@@ -64,6 +66,9 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import api from '../services/api'
+
+import DISPONIVELREAL from './img/DISPONIVELREAL.png'
+import INDISPONIVELREAL from './img/INDISPONIVELREAL.png'
 
 const apiBase = 'http://35.196.79.227:8000'
 const produtos = ref([])
@@ -159,6 +164,12 @@ const produtosVisiveisOfertas = computed(() => {
     width: 160px;
     border: 0.1px solid rgb(212, 212, 212);
     filter: contrast(100%);
+}
+
+.nome-preco-imagem .disponivel-selo {
+    width: 95px;
+    height: auto;
+    border: none;
 }
 
 .add {
@@ -281,6 +292,16 @@ const produtosVisiveisOfertas = computed(() => {
     height: auto;
     display: block;
     margin: 0 auto;
+}
+
+.disponivel-selo {
+    position: absolute;
+    left: 0px;
+    bottom: 80px;
+    width: 80px;
+    height: auto;
+    z-index: 2;
+    border-radius: 9px;
 }
 
 @media (max-width: 1200px) {

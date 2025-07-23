@@ -63,6 +63,11 @@ export async function getEndereco(id) {
   return response.data
 }
 
+export async function buscarProdutosAdmin228() {
+  const response = await api.get('/products/user/228')
+  return response.data
+}
+
 const token = localStorage.getItem('token')
 if (token) {
   api.defaults.headers.common['Authorization'] = `Bearer ${token}`
