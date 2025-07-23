@@ -12,6 +12,7 @@ import ADMcategoriasView from '../views/ADMcategorias.vue'
 import ADMprodutosView from '../views/ADMprodutos.vue'
 import ADMpedidosView from '../views/ADMpedidos.vue'
 import ADMcuponsView from '../views/ADMcupons.vue'
+import PesquisasView from '../views/pesquisas.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -25,6 +26,11 @@ const router = createRouter({
       path: '/login',
       name: 'Login',
       component: LoginView,
+    },
+    {
+      path: '/pesquisas',
+      name: 'Pesquisas',
+      component: PesquisasView,
     },
     {
       path: '/painel',

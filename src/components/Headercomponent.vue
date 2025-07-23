@@ -84,7 +84,7 @@
                 <button @click="() => {}">Mangás</button>
                 <button @click="() => {}">Artbooks</button>
                 <button @click="() => {}">Ofertas</button>
-                <button @click="() => {}">Tudo</button>
+                <button @click="irParaPesquisas">Tudo</button>
             </div>
         </div>
         <button href=""> <img src="../components/img/Lancamentofinal-Photoroom.png" alt=""> <p>Lançamentos</p></button>
@@ -92,7 +92,7 @@
         <button href=""> <img src="../components/img/mangáfinal.png" alt=""> <p>Mangás</p></button>
         <button href=""> <img src="../components/img/pincel.png" alt=""> <p>Artbooks</p></button>
         <button href=""> <img src="../components/img/ofertasfinal.png" alt=""> <p>Ofertas</p></button>
-        <button href=""> <img src="../components/img/Tudofinal-Photoroom.png" alt=""> <p>Tudo</p></button>
+        <button @click="irParaPesquisas"> <img src="../components/img/Tudofinal-Photoroom.png" alt=""> <p>Tudo</p></button>
     </div>
 </div>
 </template>
@@ -129,6 +129,10 @@ function goToPainel() {
     showDropdown.value = false
     router.push('/dados')
 }
+
+function irParaPesquisas() {
+    router.push('/pesquisas')
+}
 </script>
 
 <style scoped>
@@ -153,7 +157,7 @@ header {
 
 .logo img {
     width: auto;
-    height: 105px;
+    height: 95px;
     filter: brightness(20%);
     transform: rotate(-9deg);
 }
