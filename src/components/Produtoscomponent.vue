@@ -124,7 +124,7 @@ const produtosVisiveisOfertas = computed(() => {
     justify-content: space-between;
     align-items: center;
     margin-top: 20px;
-    background-color: #111d29;
+    background-color: #4f79a3;
     height: 4.5rem;
     width: 100%;
     max-width: 1250px;
@@ -137,7 +137,7 @@ const produtosVisiveisOfertas = computed(() => {
 
 .titulo h3 {
     font-size: 26px;
-    color: white;
+    color: rgb(255, 255, 255);
 }
 
 .produtos {

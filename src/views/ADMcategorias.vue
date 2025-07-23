@@ -327,7 +327,7 @@ function abrirCriacao() {
 }
 
 .categorias li {
-    background-color: #d6d6d6;
+    background-color: #e4e4e4;
     padding: 15px;
     margin-bottom: 10px;
     border-radius: 7px;

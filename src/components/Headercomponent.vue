@@ -5,7 +5,7 @@
         <img src="../components/img/agrsimtabao-Photoroom.png" alt="" />
         </a>
         <div class="input desktop" style="position:relative;">
-            <input type="text" placeholder="Livros, Mangás, novas visões..." v-model="busca" @input="onInputBusca" @focus="onFocusBusca" @blur="onBlurBusca" />
+            <input type="text" placeholder="Livros, Mangás, novos olhares..." v-model="busca" @input="onInputBusca" @focus="onFocusBusca" @blur="onBlurBusca" />
             <img src="../components/img/LupaFinal.png" alt="" />
             <div v-if="mostrarSugestoes && sugestoes.length > 0 && busca.length > 0" class="autocomplete-sugestoes" @mousedown.prevent>
                 <div class="autocomplete-titulo">
@@ -244,12 +244,12 @@ header {
 .input {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     background-color: #ffffff;
     border-radius: 10px;
-    padding: 0 20px;
+    padding: 0 15px;
     width: 42vw;
     height: 45px;
-    gap: 10px;
     flex-shrink: 1;
     border: 1px solid #000000;
 }
@@ -286,6 +286,7 @@ input::placeholder {
 }
 
 .botoes p {
+    font-family: helvetica;
     font-weight: bold;
     font-size: 16px;
 }
@@ -395,7 +396,7 @@ button:hover img {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 7.5vh;
+    min-height: 7vh;
     background: #02060af5;
     font-size: 14px;
     gap: 70px;
@@ -523,7 +524,7 @@ button:hover img {
     gap: 18px;
     padding: 10px 18px;
     cursor: pointer;
-    border-bottom: 1px solid #f2f2f2;
+    border-bottom: 1px solid #e9e9e9;
 }
 
 .sugestao-item img {
