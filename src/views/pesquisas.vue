@@ -3,7 +3,10 @@
 <Header></Header>
 
 <div class="inputpesquisa" >
-    <h2>Resultados para: <span v-if="termoBusca">"{{ termoBusca }}"</span></h2>
+    <h2 v-if="isLancamentos">Lançamentos</h2>
+    <h2 v-else-if="isLivros">Livros</h2>
+    <h2 v-else-if="isMangas">Mangás</h2>
+    <h2 v-else>Resultados para: <span v-if="termoBusca">"{{ termoBusca }}"</span></h2>
     </div>
 
 <div class="tudo" >
@@ -63,8 +66,8 @@
     <div class="conteudos" >
         <div class="Header-conteudos" >
             <div class="header-conteudos-left">
-                <button class="header-btn-quadrado">A</button>
-                <button class="header-btn-quadrado">B</button>
+                <button class="header-btn-quadrado"><img src="" alt=""></button>
+                <button class="header-btn-quadrado"><img src="" alt=""></button>
             </div>
             <div class="header-conteudos-right">
                 <label for="filtroOrdem" class="header-label">Ordenar por:</label>
@@ -126,6 +129,9 @@ const carregando = ref(false)
 const erro = ref('')
 const route = useRoute()
 const termoBusca = ref('')
+const isLancamentos = ref(false)
+const isLivros = ref(false)
+const isMangas = ref(false)
 
 async function buscarProdutos() {
     carregando.value = true
@@ -146,7 +152,35 @@ async function buscarProdutos() {
     }
 }
 
+function ordenarProdutos(lista) {
+    if (ordemSelecionada.value === 'valor-crescente') {
+        return lista.slice().sort((a, b) => Number(a.price) - Number(b.price))
+    } else if (ordemSelecionada.value === 'valor-decrescente') {
+        return lista.slice().sort((a, b) => Number(b.price) - Number(a.price))
+    } else if (ordemSelecionada.value === 'alfabetica') {
+        return lista.slice().sort((a, b) => a.name.localeCompare(b.name))
+    }
+    return lista
+}
+
 function filtrarProdutos() {
+    isLancamentos.value = !!route.query.lancamentos
+    isLivros.value = route.query.categoria === 'livros'
+    isMangas.value = route.query.categoria === 'mangás'
+    if (isLancamentos.value) {
+        produtosFiltrados.value = produtos.value.slice().sort((a, b) => b.id - a.id)
+        return
+    }
+    if (isLivros.value) {
+        let filtrados = produtos.value.filter(p => p.category && p.category.name && p.category.name.toLowerCase() === 'livros')
+        produtosFiltrados.value = ordenarProdutos(filtrados)
+        return
+    }
+    if (isMangas.value) {
+        let filtrados = produtos.value.filter(p => p.category && p.category.name && p.category.name.toLowerCase() === 'mangás')
+        produtosFiltrados.value = ordenarProdutos(filtrados)
+        return
+    }
     const termo = termoBusca.value.trim().toLowerCase()
     let filtrados = produtos.value
     if (termo.length > 0) {
@@ -160,24 +194,30 @@ function filtrarProdutos() {
                 return a.name.length - b.name.length
             })
     }
-    // Ordenação extra (aplicada após similaridade)
-    if (ordemSelecionada.value === 'valor-crescente') {
-        filtrados = filtrados.slice().sort((a, b) => Number(a.price) - Number(b.price))
-    } else if (ordemSelecionada.value === 'valor-decrescente') {
-        filtrados = filtrados.slice().sort((a, b) => Number(b.price) - Number(a.price))
-    } else if (ordemSelecionada.value === 'alfabetica' && termo.length === 0) {
-        filtrados = filtrados.slice().sort((a, b) => a.name.localeCompare(b.name))
-    }
-    produtosFiltrados.value = filtrados
+    produtosFiltrados.value = ordenarProdutos(filtrados)
 }
 
 onMounted(() => {
     termoBusca.value = route.query.termo ? String(route.query.termo) : ''
+    isLancamentos.value = !!route.query.lancamentos
+    isLivros.value = route.query.categoria === 'livros'
+    isMangas.value = route.query.categoria === 'mangás'
     buscarProdutos()
 })
 
 watch(() => route.query.termo, (novo) => {
     termoBusca.value = novo ? String(novo) : ''
+    filtrarProdutos()
+})
+
+watch(() => route.query.lancamentos, (novo) => {
+    isLancamentos.value = !!novo
+    filtrarProdutos()
+})
+
+watch(() => route.query.categoria, (novo) => {
+    isLivros.value = novo === 'livros'
+    isMangas.value = novo === 'mangás'
     filtrarProdutos()
 })
 

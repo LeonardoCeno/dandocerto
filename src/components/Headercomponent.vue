@@ -114,9 +114,9 @@
                 <button @click="irParaPesquisas">Tudo</button>
             </div>
         </div>
-        <button href=""> <img src="../components/img/Lancamentofinal-Photoroom.png" alt=""> <p>Lançamentos</p></button>
-        <button href=""> <img src="../components/img//Livrofinalverdadeiro-Photoroom.png" alt=""> <p>Livros</p></button>
-        <button href=""> <img src="../components/img/mangáfinal.png" alt=""> <p>Mangás</p></button>
+        <button @click="irParaLancamentos"> <img src="../components/img/Lancamentofinal-Photoroom.png" alt=""> <p>Lançamentos</p></button>
+        <button @click="irParaLivros"> <img src="../components/img//Livrofinalverdadeiro-Photoroom.png" alt=""> <p>Livros</p></button>
+        <button @click="irParaMangás"> <img src="../components/img/mangáfinal.png" alt=""> <p>Mangás</p></button>
         <button href=""> <img src="../components/img/pincel.png" alt=""> <p>Artbooks</p></button>
         <button href=""> <img src="../components/img/ofertasfinal.png" alt=""> <p>Ofertas</p></button>
         <button @click="irParaPesquisas"> <img src="../components/img/Tudofinal-Photoroom.png" alt=""> <p>Tudo</p></button>
@@ -215,6 +215,18 @@ function goToPainel() {
 
 function irParaPesquisas() {
     router.push('/pesquisas')
+}
+
+function irParaLancamentos() {
+    router.push({ path: '/pesquisas', query: { lancamentos: 1 } })
+}
+
+function irParaLivros() {
+    router.push({ path: '/pesquisas', query: { categoria: 'livros' } })
+}
+
+function irParaMangás() {
+    router.push({ path: '/pesquisas', query: { categoria: 'mangás' } })
 }
 
 function pesquisarEnter() {
