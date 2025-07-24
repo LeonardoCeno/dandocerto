@@ -90,7 +90,7 @@ import banner3 from './img/LIVRO.png'
 import Pracima from './pracima.vue'
 
 const banners = [banner1, banner2, banner3]
-const bannerLinks = ['', '', ''] // Links para cada banner que vou por ainda
+const bannerLinks = ['/pesquisas?lancamentos=1' , '/pesquisas?categoria=mangás', '/pesquisas?categoria=livros']
 const indexAtual = ref(0)
 
 const mostrarBtnTopo = ref(false)

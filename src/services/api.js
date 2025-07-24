@@ -68,6 +68,16 @@ export async function buscarProdutosAdmin228() {
   return response.data
 }
 
+export async function getCategorias() {
+  const response = await api.get('/categories/')
+  return response.data
+}
+
+export async function getCategoriasPorUsuario228() {
+  const response = await api.get('/categories/user/228')
+  return response.data
+}
+
 const token = localStorage.getItem('token')
 if (token) {
   api.defaults.headers.common['Authorization'] = `Bearer ${token}`
